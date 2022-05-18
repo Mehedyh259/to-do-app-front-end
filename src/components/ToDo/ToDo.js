@@ -14,7 +14,7 @@ const ToDo = () => {
 
     const getData = async () => {
         const email = user?.email;
-        const url = `http://localhost:5000/task?email=${email}`;
+        const url = `https://to-do-app-1324.herokuapp.com/task?email=${email}`;
         const { data } = await axios.get(url);
         setTasks(data);
         setIsLoading(false)
@@ -32,7 +32,7 @@ const ToDo = () => {
         const title = event.target.title.value;
         const description = event.target.description.value;
         const task = { email: user?.email, title, description, completed: false };
-        const url = `http://localhost:5000/task`;
+        const url = `https://to-do-app-1324.herokuapp.com/task`;
 
         const { data } = await axios.post(url, task);
         if (data.insertedId) {
@@ -43,7 +43,7 @@ const ToDo = () => {
     }
 
     const handleDoneTask = async (id) => {
-        const url = `http://localhost:5000/task/${id}`;
+        const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
         const { data } = await axios.put(url);
         if (data.modifiedCount) {
             toast.success('Task Completed');
@@ -52,13 +52,19 @@ const ToDo = () => {
     }
 
     const handleDeleteTask = async (id) => {
-        const url = `http://localhost:5000/task/${id}`;
-        console.log(url)
-        const { data } = await axios.delete(url);
-        if (data.deletedCount) {
-            toast.success("Task deleted successfully !!")
-            getData();
+
+        const proceed = window.confirm("Are you sure you want to delete ?");
+
+        if (proceed) {
+            const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
+            console.log(url)
+            const { data } = await axios.delete(url);
+            if (data.deletedCount) {
+                toast.success("Task deleted successfully !!")
+                getData();
+            }
         }
+
     }
 
     if (loading || isLoading) {
@@ -66,7 +72,7 @@ const ToDo = () => {
     }
     return (
         <div className='my-5 grid grid-cols-1 lg:grid-cols-2 gap-5'>
-            <div style={{ width: '100%' }} className=" mx-auto p-5 mb-5 shadow-lg rounded">
+            <div className=" max-w-lg mx-auto p-5 mb-5 shadow-lg rounded">
 
                 <form onSubmit={handleAddTask} >
                     <h2 className="text-3xl font-bold text-accent mb-5 text-center">Add Your Task Here</h2>
@@ -81,21 +87,30 @@ const ToDo = () => {
 
 
             <div className="tasks">
-                <h2 className="text-3xl text-center">Your Tasks </h2>
-                {
-                    tasks?.map((task) => <div key={task._id} className="rounded-xl my-3 p-5  shadow-lg flex justify-between items-center">
 
-                        <div>
+                {
+                    tasks.length === 0 ?
+                        <h2 className="text-3xl text-center">You Haven't Created Any Task Yet</h2>
+                        :
+                        <h2 className="text-3xl text-center">Your Tasks</h2>
+                }
+
+                {
+                    tasks?.map((task) => <div key={task._id} className="rounded-xl my-2 p-5  shadow-lg flex justify-between items-center">
+
+                        <div className='w-1/2 lg:w-8/12'>
                             <h2 className={`text-xl uppercase font-bold mb-1 ${task.completed ? "strikethrough text-accent" : 'text-primary'}`}>{task.title}</h2>
                             <p className={task.completed ? "strikethrough" : ''}>{task.description}</p>
                         </div>
                         <div>
-                            <button onClick={() => handleDoneTask(task._id)} disabled={task.completed} className='btn btn-xs btn-primary mr-2 text-white'>
-                                {
-                                    task.completed ? "completed" : 'complete'
-                                }
-                            </button>
-                            <button onClick={() => handleDeleteTask(task._id)} className='btn btn-xs btn-error mr-2 text-white'>delete</button>
+                            <p>
+                                <button onClick={() => handleDoneTask(task._id)} disabled={task.completed} className='btn btn-xs btn-primary mr-2 text-white'>
+                                    {
+                                        task.completed ? "completed" : 'complete'
+                                    }
+                                </button>
+                                <button onClick={() => handleDeleteTask(task._id)} className='btn btn-xs btn-error mr-2 text-white'>delete</button>
+                            </p>
                         </div>
                     </div>)
                 }
