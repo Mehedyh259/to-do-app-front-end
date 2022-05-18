@@ -1,13 +1,31 @@
+import { signOut } from 'firebase/auth';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import auth from '../../firebase.init';
+import Loading from './Loading';
 
 const NavigationBar = () => {
 
+    const [user, loading, error] = useAuthState(auth);
+
+
+    if (loading) {
+        return <Loading />
+    }
 
     const menuItems = <>
-        <li><Link className='font-bold mx-4' to='/todo'>To-Do List</Link></li>
-        <li><Link className='font-bold mx-4' to='/login'>Login</Link></li>
+        <li><Link className='font-bold mx-4 btn-ghost' to='/todo'>To-Do List</Link></li>
+        {
+            user ?
+                <li><button onClick={() => signOut(auth)} class="btn btn-ghost font-bold mx-4 text-black">Log out</button></li>
+                :
+                <li><Link className='font-bold btn-ghost mx-4' to='/login'>Login</Link></li>
+        }
+
     </>;
+
+
 
     return (
         <div style={{ zIndex: '999' }} className="navbar bg-white shadow sticky top-0">
