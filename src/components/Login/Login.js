@@ -6,6 +6,7 @@ import Loading from '../shared/Loading';
 
 const Login = () => {
 
+    let errorMessage = '';
     const location = useLocation();
     let from = location.state?.from?.pathname || '/todo';
 
@@ -36,6 +37,15 @@ const Login = () => {
         signInWithEmailAndPassword(email, password);
     }
 
+    if (error) {
+        errorMessage = '';
+        errorMessage = <p className='p-2 rounded bg-red-800 my-3 text-white'>{error?.message}</p>
+    }
+    if (gError) {
+        errorMessage = '';
+        errorMessage = <p className='p-2 rounded bg-red-800 my-3 text-white'>{gError?.message}</p>
+    }
+
     if (loading || gLoading) {
         return <Loading />
     }
@@ -50,15 +60,18 @@ const Login = () => {
             <div className='max-w-md mx-auto p-5 rounded shadow-xl my-5'>
                 <form onSubmit={handleSubmit} >
                     <h2 className="text-3xl font-bold text-accent mb-5 text-center">Please Login Here</h2>
+                    {
+                        errorMessage && errorMessage
+                    }
 
-                    <input type="email" name='email' placeholder="Enter Your Email" class="input input-bordered w-full mb-5" required />
+                    <input type="email" name='email' placeholder="Enter Your Email" className="input input-bordered w-full mb-5" required />
 
-                    <input type="password" name='password' placeholder="Enter Your Password" class="input input-bordered w-full mb-5" required />
+                    <input type="password" name='password' placeholder="Enter Your Password" className="input input-bordered w-full mb-5" required />
 
                     <input type="submit" value="Login" className='w-full mx-auto btn btn-primary text-white' />
                 </form>
 
-                <div class="divider">OR</div>
+                <div className="divider">OR</div>
                 <button onClick={handleGoogleSignIn} className='btn btn-accent mx-auto w-full mb-4'>Google Sign In</button>
 
                 <p>Don't have an account? <Link to='/register' className="text-blue-600">register here</Link></p>

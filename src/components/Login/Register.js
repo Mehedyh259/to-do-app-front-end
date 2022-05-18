@@ -9,7 +9,7 @@ import Loading from '../shared/Loading';
 
 
 const Register = () => {
-
+    let errorMessage = '';
     const navigate = useNavigate();
     const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
     const [
@@ -34,9 +34,17 @@ const Register = () => {
         navigate('/login');
         toast.success('Registration Successfull !!');
     }
-
     if (gUser) {
         navigate('/todo');
+    }
+
+    if (error) {
+        errorMessage = '';
+        errorMessage = <p className='p-2 rounded bg-red-800 my-3 text-white'>{error?.message}</p>
+    }
+    if (gError) {
+        errorMessage = '';
+        errorMessage = <p className='p-2 rounded bg-red-800 my-3 text-white'>{gError?.message}</p>
     }
 
     const handleSubmit = async (event) => {
@@ -54,16 +62,20 @@ const Register = () => {
                 <form onSubmit={handleSubmit} >
                     <h2 className="text-3xl font-bold text-accent mb-5 text-center">Please Register</h2>
 
-                    <input type="text" name='name' placeholder="Enter Your Name" class="input input-bordered w-full mb-5" required />
+                    {
+                        errorMessage && errorMessage
+                    }
 
-                    <input type="email" name='email' placeholder="Enter Your Email" class="input input-bordered w-full mb-5" required />
+                    <input type="text" name='name' placeholder="Enter Your Name" className="input input-bordered w-full mb-5" required />
 
-                    <input type="password" minLength={6} name='password' placeholder="Enter Your Password" class="input input-bordered w-full mb-5" required />
+                    <input type="email" name='email' placeholder="Enter Your Email" className="input input-bordered w-full mb-5" required />
+
+                    <input type="password" minLength={6} name='password' placeholder="Enter Your Password" className="input input-bordered w-full mb-5" required />
 
                     <input type="submit" value="Register" className='w-full mx-auto btn btn-primary text-white' />
                 </form>
 
-                <div class="divider">OR</div>
+                <div className="divider">OR</div>
                 <button onClick={handleGoogleSignIn} className='btn btn-accent mx-auto w-full mb-4'>Google Sign In</button>
 
                 <p>Already have an account? <Link to='/login' className="text-blue-600">Please Login</Link></p>
