@@ -1,11 +1,31 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { toast } from 'react-toastify';
 import auth from '../../firebase.init';
 import Loading from '../shared/Loading';
+import './ToDo.css'
 
 const ToDo = () => {
+    const [tasks, setTasks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     const [user, loading, error] = useAuthState(auth);
+
+    const getData = async () => {
+        const email = user?.email;
+        const url = `http://localhost:5000/task?email=${email}`;
+        const { data } = await axios.get(url);
+        setTasks(data);
+        setIsLoading(false)
+    }
+
+    useEffect(() => {
+        if (user) {
+            getData();
+        }
+
+    }, [user]);
 
     const handleAddTask = async (event) => {
         event.preventDefault();
@@ -15,84 +35,75 @@ const ToDo = () => {
         const url = `http://localhost:5000/task`;
 
         const { data } = await axios.post(url, task);
-        console.log(data);
-
-
-
-
+        if (data.insertedId) {
+            toast.success('Task added successfully !!');
+            getData();
+            event.target.reset();
+        }
     }
 
-    if (user) {
-        console.log(user?.email);
+    const handleDoneTask = async (id) => {
+        const url = `http://localhost:5000/task/${id}`;
+        const { data } = await axios.put(url);
+        if (data.modifiedCount) {
+            toast.success('Task Completed');
+            getData();
+        }
     }
 
-    if (loading) {
+    const handleDeleteTask = async (id) => {
+        const url = `http://localhost:5000/task/${id}`;
+        console.log(url)
+        const { data } = await axios.delete(url);
+        if (data.deletedCount) {
+            toast.success("Task deleted successfully !!")
+            getData();
+        }
+    }
+
+    if (loading || isLoading) {
         return <Loading />
     }
     return (
-        <div className='my-5'>
-            <div className="max-w-lg mx-auto p-5 mb-5 shadow-lg rounded">
+        <div className='my-5 grid grid-cols-1 lg:grid-cols-2 gap-5'>
+            <div style={{ width: '100%' }} className=" mx-auto p-5 mb-5 shadow-lg rounded">
 
                 <form onSubmit={handleAddTask} >
                     <h2 className="text-3xl font-bold text-accent mb-5 text-center">Add Your Task Here</h2>
 
                     <input type="text" name='title' placeholder="Task Title" className="input input-bordered w-full mb-5" required />
 
-                    <textarea class="textarea textarea-info w-full mb-5" name='description' placeholder="Task Description" required></textarea>
+                    <textarea className="textarea textarea-info w-full mb-5" rows={5} name='description' placeholder="Task Description" required></textarea>
 
                     <input type="submit" value="Add Task" className='w-full mx-auto btn btn-primary text-white' />
                 </form>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="table w-full text-center">
 
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Task Name</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div className="tasks">
+                <h2 className="text-3xl text-center">Your Tasks </h2>
+                {
+                    tasks?.map((task) => <div key={task._id} className="rounded-xl my-3 p-5  shadow-lg flex justify-between items-center">
 
-                        <tr>
-                            <th>1</th>
-                            <td>Cy Ganderton</td>
-                            <td>Quality Control Specialist</td>
-                            <td>Pending</td>
-                            <td>
-                                <button className='btn btn-xs btn-primary mr-2 text-white'>mark done</button>
-                                <button className='btn btn-xs btn-error mr-2 text-white'>delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>1</th>
-                            <td>Cy Ganderton</td>
-                            <td>Quality Control Specialist</td>
-                            <td>Pending</td>
-                            <td>
-                                <button className='btn btn-xs btn-primary mr-2 text-white'>mark done</button>
-                                <button className='btn btn-xs btn-error mr-2 text-white'>delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>1</th>
-                            <td>Cy Ganderton</td>
-                            <td>Quality Control Specialist</td>
-                            <td>Pending</td>
-                            <td>
-                                <button className='btn btn-xs btn-primary mr-2 text-white'>mark done</button>
-                                <button className='btn btn-xs btn-error mr-2 text-white'>delete</button>
-                            </td>
-                        </tr>
+                        <div>
+                            <h2 className={`text-xl uppercase font-bold mb-1 ${task.completed ? "strikethrough text-accent" : 'text-primary'}`}>{task.title}</h2>
+                            <p className={task.completed ? "strikethrough" : ''}>{task.description}</p>
+                        </div>
+                        <div>
+                            <button onClick={() => handleDoneTask(task._id)} disabled={task.completed} className='btn btn-xs btn-primary mr-2 text-white'>
+                                {
+                                    task.completed ? "completed" : 'complete'
+                                }
+                            </button>
+                            <button onClick={() => handleDeleteTask(task._id)} className='btn btn-xs btn-error mr-2 text-white'>delete</button>
+                        </div>
+                    </div>)
+                }
 
 
-                    </tbody>
-                </table>
             </div>
+
+
 
         </div>
     );
