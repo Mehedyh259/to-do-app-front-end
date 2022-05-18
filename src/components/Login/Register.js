@@ -1,9 +1,11 @@
+import { async } from '@firebase/util';
 import { signOut } from 'firebase/auth';
 import React from 'react';
-import { useCreateUserWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth'
+import { useCreateUserWithEmailAndPassword, useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth'
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import auth from '../../firebase.init';
+import Loading from '../shared/Loading';
 
 
 const Register = () => {
@@ -16,6 +18,12 @@ const Register = () => {
         loading,
         error,
     ] = useCreateUserWithEmailAndPassword(auth);
+
+    const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+
+    if (gLoading || loading) {
+        return <Loading />
+    }
 
     const handleGoogleSignIn = () => {
         signInWithGoogle();
@@ -31,19 +39,20 @@ const Register = () => {
         navigate('/todo');
     }
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const name = event.target.name.value;
         const email = event.target.email.value;
         const password = event.target.password.value;
-
+        await createUserWithEmailAndPassword(email, password);
+        await updateProfile({ displayName: name });
     }
 
     return (
         <>
             <div className='max-w-md mx-auto p-5 rounded shadow-xl my-5'>
                 <form onSubmit={handleSubmit} >
-                    <h2 className="text-3xl font-bold text-accent mb-5 text-center">Please Login Here</h2>
+                    <h2 className="text-3xl font-bold text-accent mb-5 text-center">Please Register</h2>
 
                     <input type="text" name='name' placeholder="Enter Your Name" class="input input-bordered w-full mb-5" required />
 
@@ -51,7 +60,7 @@ const Register = () => {
 
                     <input type="password" minLength={6} name='password' placeholder="Enter Your Password" class="input input-bordered w-full mb-5" required />
 
-                    <input type="submit" value="Login" className='w-full mx-auto btn btn-primary text-white' />
+                    <input type="submit" value="Register" className='w-full mx-auto btn btn-primary text-white' />
                 </form>
 
                 <div class="divider">OR</div>

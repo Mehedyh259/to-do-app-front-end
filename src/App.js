@@ -8,6 +8,7 @@ import Register from './components/Login/Register';
 import NavigationBar from './components/shared/NavigationBar';
 import NotFound from './components/shared/NotFound';
 import ToDo from './components/ToDo/ToDo';
+import RequireAuth from './components/Login/RequireAuth';
 
 function App() {
   return (
@@ -16,9 +17,10 @@ function App() {
 
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/todo' element={<ToDo />} />
         <Route path='/register' element={<Register />} />
         <Route path='/login' element={<Login />} />
+
+        <Route path='/todo' element={<RequireAuth><ToDo /></RequireAuth>} />
 
         <Route path='*' element={<NotFound />} />
       </Routes>

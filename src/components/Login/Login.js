@@ -1,28 +1,48 @@
-import React from 'react';
-import { useSignInWithGoogle } from 'react-firebase-hooks/auth'
+import React, { useEffect } from 'react';
+import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import auth from '../../firebase.init';
+import Loading from '../shared/Loading';
 
 const Login = () => {
 
     const location = useLocation();
-
     let from = location.state?.from?.pathname || '/todo';
 
     const navigate = useNavigate();
-    const [signInWithGoogle, gUser, loading, error] = useSignInWithGoogle(auth);
+    const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
+    const [
+        signInWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useSignInWithEmailAndPassword(auth);
+
+    useEffect(() => {
+        if (gUser || user) {
+            navigate(from, { replace: true });
+        }
+    }, [user, gUser]);
+
 
     const handleGoogleSignIn = () => {
         signInWithGoogle();
     }
 
-    if (gUser) {
-        navigate(from, { replace: true });
-    }
-
     const handleSubmit = (event) => {
         event.preventDefault();
+        const email = event.target.email.value;
+        const password = event.target.password.value;
+        signInWithEmailAndPassword(email, password);
     }
+
+    if (loading || gLoading) {
+        return <Loading />
+    }
+
+
+
+
 
     return (
 
