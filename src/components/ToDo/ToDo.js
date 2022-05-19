@@ -76,7 +76,7 @@ const ToDo = () => {
     }
 
     const handleDoneTask = async (id) => {
-        const url = `http://localhost:5000/task/${id}`;
+        const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
 
         console.log(url);
 
