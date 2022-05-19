@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import auth from '../../firebase.init';
+import useToken from '../../hooks/useToken';
 import Loading from '../shared/Loading';
 
 const Login = () => {
+
 
     let errorMessage = '';
     const location = useLocation();
@@ -19,11 +21,15 @@ const Login = () => {
         error,
     ] = useSignInWithEmailAndPassword(auth);
 
+    const [token] = useToken(user || gUser);
+
+
     useEffect(() => {
-        if (gUser || user) {
+        if (token) {
             navigate(from, { replace: true });
         }
-    }, [user, gUser]);
+    }, [token, from, navigate]);
+
 
 
     const handleGoogleSignIn = () => {

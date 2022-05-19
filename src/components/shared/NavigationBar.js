@@ -9,6 +9,11 @@ const NavigationBar = () => {
 
     const [user, loading, error] = useAuthState(auth);
 
+    const handleSignOut = () => {
+        localStorage.removeItem('accessToken');
+        signOut(auth);
+    }
+
 
     if (loading) {
         return <Loading />
@@ -18,7 +23,7 @@ const NavigationBar = () => {
         <li><Link className='font-bold mx-4 btn-ghost' to='/todo'>To-Do List</Link></li>
         {
             user ?
-                <li><button onClick={() => signOut(auth)} className="btn btn-ghost font-bold mx-4 text-black">Log out</button></li>
+                <li><button onClick={handleSignOut} className="btn btn-ghost font-bold mx-4 text-black">Log out</button></li>
                 :
                 <li><Link className='font-bold btn-ghost mx-4' to='/login'>Login</Link></li>
         }

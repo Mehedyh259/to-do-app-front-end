@@ -1,24 +1,20 @@
 import axios from 'axios';
+import { signOut } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import auth from '../../firebase.init';
 import Loading from '../shared/Loading';
 import './ToDo.css'
 
 const ToDo = () => {
+    const navigate = useNavigate()
     const [tasks, setTasks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const [user, loading, error] = useAuthState(auth);
 
-    const getData = async () => {
-        const email = user?.email;
-        const url = `https://to-do-app-1324.herokuapp.com/task?email=${email}`;
-        const { data } = await axios.get(url);
-        setTasks(data);
-        setIsLoading(false)
-    }
 
     useEffect(() => {
         if (user) {
@@ -27,6 +23,35 @@ const ToDo = () => {
 
     }, [user]);
 
+    const errorTokenHandle = (error) => {
+        setIsLoading(false);
+        console.log(error);
+        const status = error.response.status;
+        if (status === 401 || status === 403) {
+            signOut(auth);
+            navigate('/login');
+            toast.error(error.response?.data?.message);
+            localStorage.removeItem('accessToken');
+        }
+    }
+
+    const getData = async () => {
+        const email = user?.email;
+        const url = `https://to-do-app-1324.herokuapp.com/task?email=${email}`;
+        try {
+            const { data } = await axios.get(url, {
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            setTasks(data);
+            setIsLoading(false)
+        } catch (error) {
+            errorTokenHandle(error);
+        }
+    }
+
+
     const handleAddTask = async (event) => {
         event.preventDefault();
         const title = event.target.title.value;
@@ -34,21 +59,34 @@ const ToDo = () => {
         const task = { email: user?.email, title, description, completed: false };
         const url = `https://to-do-app-1324.herokuapp.com/task`;
 
-        const { data } = await axios.post(url, task);
-        if (data.insertedId) {
-            toast.success('Task added successfully !!');
-            getData();
-            event.target.reset();
+        try {
+            const { data } = await axios.post(url, task, {
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            if (data.insertedId) {
+                toast.success('Task added successfully !!');
+                getData();
+                event.target.reset();
+            }
+        } catch (error) {
+            errorTokenHandle(error);
         }
     }
 
     const handleDoneTask = async (id) => {
-        const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
+        const url = `http://localhost:5000/task/${id}`;
+
+        console.log(url);
+
         const { data } = await axios.put(url);
+
         if (data.modifiedCount) {
             toast.success('Task Completed');
             getData();
         }
+
     }
 
     const handleDeleteTask = async (id) => {
@@ -56,12 +94,20 @@ const ToDo = () => {
         const proceed = window.confirm("Are you sure you want to delete ?");
 
         if (proceed) {
-            const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
-            console.log(url)
-            const { data } = await axios.delete(url);
-            if (data.deletedCount) {
-                toast.success("Task deleted successfully !!")
-                getData();
+            try {
+                const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
+                console.log(url)
+                const { data } = await axios.delete(url, {
+                    headers: {
+                        authorization: `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+                if (data.deletedCount) {
+                    toast.success("Task deleted successfully !!")
+                    getData();
+                }
+            } catch (error) {
+                errorTokenHandle(error);
             }
         }
 
