@@ -7,7 +7,7 @@ const useToken = (user) => {
         const email = user?.user?.email;
 
         if (email) {
-            const url = `https://to-do-app-1324.herokuapp.com/login`;
+            const url = `https://todo-server-1542.herokuapp.com/login`;
             const getToken = async () => {
                 const { data } = await axios.post(url, { email })
                 localStorage.setItem('accessToken', data.accessToken);

@@ -37,7 +37,7 @@ const ToDo = () => {
 
     const getData = async () => {
         const email = user?.email;
-        const url = `https://to-do-app-1324.herokuapp.com/task?email=${email}`;
+        const url = `https://todo-server-1542.herokuapp.com/task?email=${email}`;
         try {
             const { data } = await axios.get(url, {
                 headers: {
@@ -57,7 +57,7 @@ const ToDo = () => {
         const title = event.target.title.value;
         const description = event.target.description.value;
         const task = { email: user?.email, title, description, completed: false };
-        const url = `https://to-do-app-1324.herokuapp.com/task`;
+        const url = `https://todo-server-1542.herokuapp.com/task`;
 
         try {
             const { data } = await axios.post(url, task, {
@@ -76,7 +76,7 @@ const ToDo = () => {
     }
 
     const handleDoneTask = async (id) => {
-        const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
+        const url = `https://todo-server-1542.herokuapp.com/task/${id}`;
 
         console.log(url);
 
@@ -95,7 +95,7 @@ const ToDo = () => {
 
         if (proceed) {
             try {
-                const url = `https://to-do-app-1324.herokuapp.com/task/${id}`;
+                const url = `https://todo-server-1542.herokuapp.com/task/${id}`;
                 console.log(url)
                 const { data } = await axios.delete(url, {
                     headers: {
